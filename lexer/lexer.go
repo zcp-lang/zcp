@@ -182,15 +182,8 @@ self.p++
 
 chr := self.Get()
 
-//负数
-if "0" <= chr && chr <= "9" {
-
-t.Token = NNUMBER
-t.Value = self.Number()
-t.Line = self.line
-
 //-=
-}else if chr == "=" {
+if chr == "=" {
 
 t.Token = SUBTRACT_ASSIGN
 t.Value = ch+chr

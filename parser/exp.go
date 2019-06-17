@@ -12,7 +12,7 @@ p := self.p
 
 if t,_,l := self.GetTokenSkip();t==NULL {
 
-return &NullExp{l}
+return NullExp{l}
 
 }
 
@@ -28,7 +28,7 @@ p := self.p
 
 if t,_,l := self.GetTokenSkip();t==TRUE {
 
-return &TrueExp{l}
+return TrueExp{l}
 
 }
 
@@ -44,7 +44,7 @@ p := self.p
 
 if t,_,l := self.GetTokenSkip();t==FALSE {
 
-return &FalseExp{l}
+return FalseExp{l}
 
 }
 
@@ -60,7 +60,7 @@ p := self.p
 
 if t,v,l := self.GetTokenSkip();t==IDENTIFIER {
 
-return &NameExp{l,v}
+return NameExp{l,v}
 
 }
 
@@ -76,7 +76,7 @@ p := self.p
 
 if t,v,l := self.GetTokenSkip();t==STRING {
 
-return &StringExp{l,v}
+return StringExp{l,v}
 
 }
 
@@ -94,7 +94,7 @@ if t,v,l := self.GetTokenSkip();t==NUMBER || t==NNUMBER {
 
 r,_:=strconv.Atoi(v)
 
-return &NumberExp{l,r}
+return NumberExp{l,r}
 
 }
 
@@ -110,7 +110,7 @@ p := self.p
 
 if t,v,l := self.GetTokenSkip();t==POINTER {
 
-return &PointerExp{l,v}
+return PointerExp{l,v}
 
 }
 
@@ -126,7 +126,7 @@ p := self.p
 
 if t,v,l := self.GetTokenSkip();t==QUOTE {
 
-return &QuoteExp{l,v}
+return QuoteExp{l,v}
 
 }
 
@@ -142,7 +142,7 @@ p := self.p
 
 if t,v,l := self.GetTokenSkip();t==COMMENT {
 
-return &CommentExp{l,v}
+return CommentExp{l,v}
 
 }
 
@@ -158,7 +158,7 @@ p := self.p
 
 if t,v,l := self.GetTokenSkip();t==LENGTH {
 
-return &LengthExp{l,v}
+return LengthExp{l,v}
 
 }
 
@@ -174,7 +174,7 @@ p := self.p
 
 if t,v,l := self.GetTokenSkip();t==CONTRARY {
 
-return &LogicalExp{l,"!","!",v}
+return LogicalExp{l,"!","!",v}
 
 }
 
@@ -194,26 +194,26 @@ right_t,right_v,right_l := self.GetTokenSkip();
 
 if left_t == INCREMENT && right_t == IDENTIFIER {
 
-return &UpdateExp{right_l,"++",right_v,true}
+return UpdateExp{right_l,"++",right_v,true}
 
 }
 
 if left_t == DECREMENT && right_t == IDENTIFIER {
 
-return &UpdateExp{right_l,"--",right_v,true}
+return UpdateExp{right_l,"--",right_v,true}
 
 }
 
 if left_t == IDENTIFIER && right_t == INCREMENT {
 
 
-return &UpdateExp{left_l,"++",left_v,false}
+return UpdateExp{left_l,"++",left_v,false}
 
 }
 
 if left_t == IDENTIFIER && right_t == DECREMENT {
 
-return &UpdateExp{left_l,"--",left_v,false}
+return UpdateExp{left_l,"--",left_v,false}
 
 }
 
@@ -243,6 +243,62 @@ return exp;
 
 }
 */
+
+func (self *Parser) ArrayItem() Exp {
+
+p := self.p
+
+exp1 := self.Exp()
+
+if exp1 == nil { self.p = p; return nil; }
+
+p = self.p
+
+t,_,_ := self.GetTokenSkip()
+
+if exp2 := self.Exp(); t == COLON && exp2 != nil {
+
+return ArrayItem{exp1,exp2}
+
+}else{ self.p = p; return exp1; }
+
+self.p = p
+
+return exp1;
+
+}
+
+func (self *Parser) ArrayExp() Exp {
+
+p := self.p
+
+var result []Exp
+
+exp1 := self.Exp()
+
+if exp1 == nil { self.p = p; return nil; }
+
+result[] = exp1
+
+for {
+
+p = self.p
+
+t,v,l := self.GetTokenSkip();
+
+if t != COMMA { self.p = p; return ArrayExp{l,result}; }
+
+exp2 := self.Exp()
+
+if exp2 == nil { self.p = p; return ArrayExp{l,result}; }
+
+result[] = exp2
+
+}
+
+return ArrayExp{l,result}
+
+}
 
 func (self *Parser) Exp0() Exp {
 
@@ -323,5 +379,161 @@ return exp
 self.p = p
 
 return nil
+
+}
+
+func (self *Parser) Exp1() Exp {
+
+p := self.p
+
+exp1 := self.Exp0()
+
+if exp1 == nil { self.p = p; return nil; }
+
+p = self.p
+
+t,v,l := self.GetTokenSkip()
+
+if exp2 := self.Exp1();(t == MULTIPLY || t == SLASH ||t == REMAINDER) && (exp2 != nil) {
+
+return BinaryExp{l,v,exp1,exp2}
+
+}else{ self.p = p; return exp1; }
+
+self.p = p
+
+return exp1;
+
+}
+
+func (self *Parser) Exp2() Exp {
+
+p := self.p
+
+exp1 := self.Exp1()
+
+if exp1 == nil { self.p = p; return nil; }
+
+p = self.p
+
+t,v,l := self.GetTokenSkip()
+
+if exp2 := self.Exp2();(t == PLUS || t == MINUS) && (exp2 != nil) {
+
+return BinaryExp{l,v,exp1,exp2}
+
+}else{ self.p = p; return exp1; }
+
+self.p = p
+
+return exp1;
+
+}
+
+func (self *Parser) Exp3() Exp {
+
+p := self.p
+
+exp1 := self.Exp2()
+
+if exp1 == nil { self.p = p; return nil; }
+
+p = self.p
+
+t,v,l := self.GetTokenSkip()
+
+if exp2 := self.Exp3(); t == CONCAT && exp2 != nil {
+
+return BinaryExp{l,v,exp1,exp2}
+
+}else{ self.p = p; return exp1; }
+
+self.p = p
+
+return exp1;
+
+}
+
+func (self *Parser) Exp4() Exp {
+
+p := self.p
+
+exp1 := self.Exp3()
+
+if exp1 == nil { self.p = p; return nil; }
+
+p = self.p
+
+t,v,l := self.GetTokenSkip()
+
+if exp2 := self.Exp4();(t == LESS || t == GREATER || t == LESS_OR_EQUAL || t == GREATER_OR_EQUAL || t == NOT_EQUAL || t == EQUAL || t == STRICT_NOT_EQUAL || t == STRICT_EQUAL || t == STRING_START || t == STRING_END || t == QUESTION_MARK) && (exp2 != nil) {
+
+return BinaryExp{l,v,exp1,exp2}
+
+}else{ self.p = p; return exp1; }
+
+self.p = p
+
+return exp1;
+
+}
+
+func (self *Parser) Exp5() Exp {
+
+p := self.p
+
+exp1 := self.Exp4()
+
+if exp1 == nil { self.p = p; return nil; }
+
+p = self.p
+
+t,v,l := self.GetTokenSkip()
+
+if exp2 := self.Exp5(); t == LOGICAL_AND && exp2 != nil {
+
+return LogicalExp{l,v,exp1,exp2}
+
+}else{ self.p = p; return exp1; }
+
+self.p = p
+
+return exp1;
+
+}
+
+func (self *Parser) Exp6() Exp {
+
+p := self.p
+
+exp1 := self.Exp5()
+
+if exp1 == nil { self.p = p; return nil; }
+
+p = self.p
+
+t,v,l := self.GetTokenSkip()
+
+if exp2 := self.Exp6(); t == LOGICAL_OR && exp2 != nil {
+
+return LogicalExp{l,v,exp1,exp2}
+
+}else{ self.p = p; return exp1; }
+
+self.p = p
+
+return exp1;
+
+}
+
+func (self *Parser) Exp() Exp {
+
+p := self.p
+
+exp := self.Exp6()
+
+if exp == nil { self.p = p; return nil; }
+
+return exp
 
 }

@@ -54,24 +54,16 @@ type UpdateExp struct {
 	Prefix bool
 }
 
+type BinaryExp struct {
+	Line int
+	Op   string
+	Exp1 Exp
+	Exp2 Exp
+}
+
 type ConcatExp struct {
 	Line int
 	Exps []Exp
-}
-
-type ArrayConstructorExp struct {
-	Line     int
-	LastLine int
-	KeyExps  []Exp
-	ValExps  []Exp
-}
-
-type FuncDefExp struct {
-	Line     int
-	LastLine int
-	ParList  []string
-	IsVararg bool
-	Block    *Block
 }
 
 type NameExp struct {
@@ -101,6 +93,16 @@ type CommentExp struct {
 
 type ParensExp struct {
 	Exp Exp
+}
+
+type ArrayItem struct {
+	Key    Exp
+	Value  Exp
+}
+
+type ArrayExp struct {
+	Line   int
+	Items  []Exp
 }
 
 type ArrayAccessExp struct {

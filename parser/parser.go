@@ -30,7 +30,7 @@ return &Parser{p:0,token:token}
 
 func (self *Parser) Run() {
 
-exp := self.Exp0()
+exp := self.ArrayItem()
 
 fmt.Println(exp)
 

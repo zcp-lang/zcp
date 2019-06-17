@@ -92,9 +92,10 @@ type LocalVarDeclStat struct {
 	NameList []string
 	ExpList  []Exp
 }
-
+/*
 // local function Name funcbody
 type LocalFuncDefStat struct {
 	Name string
 	Exp  *FuncDefExp
 }
+*/
