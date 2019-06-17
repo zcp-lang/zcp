@@ -264,7 +264,7 @@ return ArrayItem{exp1,exp2}
 
 self.p = p
 
-return exp1;
+return exp1
 
 }
 
@@ -272,37 +272,69 @@ func (self *Parser) ArrayExp() Exp {
 
 p := self.p
 
-var result []Exp
+_,_,line := self.GetTokenSkip()
 
-exp1 := self.Exp()
+self.p = p
+
+result := make([]Exp,0)
+
+exp1 := self.ArrayItem()
 
 if exp1 == nil { self.p = p; return nil; }
 
-result[] = exp1
+result = append(result,exp1)
 
 for {
 
 p = self.p
 
-t,v,l := self.GetTokenSkip();
+t,_,l := self.GetTokenSkip()
+
+line = l
 
 if t != COMMA { self.p = p; return ArrayExp{l,result}; }
 
-exp2 := self.Exp()
+exp2 := self.ArrayItem()
 
 if exp2 == nil { self.p = p; return ArrayExp{l,result}; }
 
-result[] = exp2
+result = append(result,exp2)
 
 }
 
-return ArrayExp{l,result}
+return ArrayExp{line,result}
+
+}
+
+func (self *Parser) Array() Exp {
+
+p := self.p
+
+t,_,l := self.GetTokenSkip();
+
+if t != LEFT_BRACKET { self.p = p; return nil; }
+
+p1 := self.p
+
+exp := self.ArrayExp();
+
+if exp == nil { self.p = p1; }
+
+if t,_,_ := self.GetTokenSkip();t != RIGHT_BRACKET { self.p = p; return nil; }
+
+if exp != nil { return exp; }else{ return ArrayExp{l,nil}; }
 
 }
 
 func (self *Parser) Exp0() Exp {
 
 p := self.p
+
+if exp:=self.Array();exp!=nil {
+
+return exp
+
+}
 
 if exp:=self.Update();exp!=nil {
 
