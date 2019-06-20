@@ -105,6 +105,11 @@ type ArrayExp struct {
 	Items  []Exp
 }
 
+type ArrayCallExp struct {
+	Left   Exp
+	Right  Exp
+}
+
 type ArrayAccessExp struct {
 	LastLine  int
 	PrefixExp Exp

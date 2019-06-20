@@ -325,6 +325,60 @@ if exp != nil { return exp; }else{ return ArrayExp{l,nil}; }
 
 }
 
+func (self *Parser) ArrayRight() Exp {
+
+p := self.p
+
+if t,_,_ := self.GetTokenSkip();t != LEFT_BRACKET { self.p = p; return nil; }
+
+exp := self.Exp()
+
+if exp == nil { self.p = p; return nil; }
+
+if t,_,_ := self.GetTokenSkip();t != RIGHT_BRACKET { self.p = p; return nil; }
+
+return exp
+
+}
+
+func (self *Parser) ArrayInit() Exp {
+
+p := self.p
+
+left := self.Exp()
+
+if left == nil { self.p = p; return nil; }
+
+right := self.Exp()
+
+if right == nil { self.p = p; return nil; }
+
+return ArrayCallExp{left,right}
+
+}
+
+func (self *Parser) ArrayCall() Exp {
+
+p := self.p
+
+left := self.ArrayInit()
+
+if left == nil { self.p = p; return nil; }
+
+for {
+
+right := self.ArrayRight()
+
+if right == nil { break; }
+
+left = ArrayCallExp{left,right}
+
+}
+
+return left
+
+}
+
 func (self *Parser) Exp0() Exp {
 
 p := self.p
