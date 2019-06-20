@@ -345,7 +345,7 @@ func (self *Parser) ArrayInit() Exp {
 
 p := self.p
 
-left := self.Exp()
+left := self.Name()
 
 if left == nil { self.p = p; return nil; }
 
@@ -382,6 +382,12 @@ return left
 func (self *Parser) Exp0() Exp {
 
 p := self.p
+
+if exp:=self.ArrayCall();exp!=nil {
+
+return exp
+
+}
 
 if exp:=self.Array();exp!=nil {
 

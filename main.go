@@ -10,7 +10,7 @@ import (
 
 func main(){
 
-str := `(2+3)*4+(5-2)*9`
+str := `a[2]["moid"][4*5]+666`
 
 l,_ := lexer.New(str)
 
