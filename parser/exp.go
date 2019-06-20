@@ -222,7 +222,7 @@ self.p = p
 return nil
 
 }
-/*
+
 func (self *Parser) Staid() Exp {
 
 p := self.p
@@ -242,7 +242,6 @@ if right != RIGHT_PARENTHESIS { self.p = p; return nil; }
 return exp;
 
 }
-*/
 
 func (self *Parser) ArrayItem() Exp {
 
@@ -403,6 +402,12 @@ return exp
 }
 
 if exp:=self.Contrary();exp!=nil {
+
+return exp
+
+}
+
+if exp:=self.Staid();exp!=nil {
 
 return exp
 

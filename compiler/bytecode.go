@@ -3,7 +3,14 @@ package compiler
 type Bytecode int
 
 const (
-      OP_PUSH = "PUSH"
+      OP_PUSH           = "PUSH"
+      OP_PLUS           = "PLUS"
+      OP_MINUS          = "MINUS"
+      OP_MULTIPLY       = "MULTIPLY"
+      OP_SLASH          = "SLASH"
+      OP_REMAINDE       = "REMAINDE"
+      OP_CALL           = "CALL"
+      
 )
 
 /*
