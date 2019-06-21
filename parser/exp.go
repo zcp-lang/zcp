@@ -379,9 +379,49 @@ return left
 
 }
 
+func (self *Parser) Call() Exp {
+
+p := self.p
+
+prefix := self.Name()
+
+if prefix == nil { self.p = p; return nil; }
+
+p1 := self.p
+
+if t,_,_ := self.GetTokenSkip();t != PERIOD { self.p = p1; }
+
+name := self.Name()
+
+if name == nil { self.p = p1; }
+
+if t,_,_ := self.GetTokenSkip();t != LEFT_PARENTHESIS { self.p = p; return nil; }
+
+p2 := self.p
+
+args := self.Exp()
+
+if args == nil { self.p = p2; }
+
+t,_,l := self.GetTokenSkip();
+
+if t != RIGHT_PARENTHESIS { self.p = p; return nil; }
+
+if name == nil { name = prefix; prefix = nil; }
+
+return CallExp{l,prefix,name,args}
+
+}
+
 func (self *Parser) Exp0() Exp {
 
 p := self.p
+
+if exp:=self.Call();exp!=nil {
+
+return exp
+
+}
 
 if exp:=self.ArrayCall();exp!=nil {
 
@@ -631,6 +671,24 @@ exp := self.Exp6()
 
 if exp == nil { self.p = p; return nil; }
 
-return exp
+result := make([]Exp,0)
+
+result = append(result,exp)
+
+for {
+
+p = self.p
+
+if t,_,_ := self.GetTokenSkip(); t != COMMA { self.p = p; return Exps{result}; }
+
+exp2 := self.Exp6()
+
+if exp2 == nil { self.p = p; return Exps{result}; }
+
+result = append(result,exp2)
+
+}
+
+return Exps{result}
 
 }

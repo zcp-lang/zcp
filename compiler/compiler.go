@@ -9,7 +9,7 @@ type Compiler struct{
    Err string
 }
 
-func New() *Compiler {
+func New_Compiler() *Compiler {
 
 return &Compiler{0,""}
 

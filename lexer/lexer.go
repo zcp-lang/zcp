@@ -21,7 +21,7 @@ type Lexer struct{
 }
 
 //初始化
-func New(str string) (*Lexer,bool) {
+func New_Lexer(str string) (*Lexer,bool) {
 
 var l Lexer
 

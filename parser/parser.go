@@ -21,7 +21,7 @@ return reflect.TypeOf(v).String()
 }
 
 
-func New(token map[int]Tkn) *Parser {
+func New_Parser(token map[int]Tkn) *Parser {
 
 return &Parser{p:0,token:token}
 
@@ -30,7 +30,7 @@ return &Parser{p:0,token:token}
 
 func (self *Parser) Run() {
 
-exp := self.Exp()
+exp := self.Block()
 
 fmt.Println(exp)
 
@@ -49,25 +49,41 @@ return token,value,line
 
 }
 
+func (self *Parser) GetTokens() (Token,string,int) {
 
-func (self *Parser) GetTokenSkip() (Token,string,int) {
+var token Token
+var value string
+var line int
 
-token := self.token[self.p].Token
-value := self.token[self.p].Value
-line := self.token[self.p].Line
-
-if SPACE == token || LINE == token {
-
-self.p++
+for {
 
 token = self.token[self.p].Token
 value = self.token[self.p].Value
 line = self.token[self.p].Line
 
+if SPACE == token { self.p++; }else{ self.p++; break; }
+
 }
 
+return token,value,line
 
-self.p++
+}
+
+func (self *Parser) GetTokenSkip() (Token,string,int) {
+
+var token Token
+var value string
+var line int
+
+for {
+
+token = self.token[self.p].Token
+value = self.token[self.p].Value
+line = self.token[self.p].Line
+
+if SPACE == token || LINE == token { self.p++; }else{ self.p++; break; }
+
+}
 
 return token,value,line
 

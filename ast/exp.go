@@ -2,6 +2,10 @@ package ast
 
 type Exp interface{}
 
+type Exps struct {
+	Exp []Exp
+}
+
 type NullExp struct{ Line int }
 type TrueExp struct{ Line int }
 type FalseExp struct{ Line int }
@@ -119,8 +123,8 @@ type ArrayAccessExp struct {
 type CallExp struct {
 	Line      int
 	Prefix    Exp
-	Name      StringExp
-	Args      []Exp
+	Name      Exp
+	Args      Exp
 }
 
 type FuncCallExp struct {

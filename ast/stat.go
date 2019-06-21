@@ -1,101 +1,41 @@
 package ast
 
-/*
-stat ::=  ‘;’ |
-	 varlist ‘=’ explist |
-	 functioncall |
-	 label |
-	 break |
-	 goto Name |
-	 do block end |
-	 while exp do block end |
-	 repeat block until exp |
-	 if exp then block {elseif exp then block} [else block] end |
-	 for Name ‘=’ exp ‘,’ exp [‘,’ exp] do block end |
-	 for namelist in explist do block end |
-	 function funcname funcbody |
-	 local function Name funcbody |
-	 local namelist [‘=’ explist]
-*/
 type Stat interface{}
 
-type EmptyStat struct{}            // ‘;’
-type BreakStat struct{ Line int }  // break
-type DoStat struct{ Block *Block } // do block end
-type FuncCallStat = FuncCallExp    // functioncall
+type BreakStat struct{ Line int }
 
-// ‘::’ Name ‘::’
-type LabelStat struct {
-	Line int
-	Name string
+type ReturnStat struct{
+	Line    int
+	Exp     Exp
 }
 
-// goto Name
-type GotoStat struct {
-	Line int
-	Name string
-}
-
-// if exp then block {elseif exp then block} [else block] end
 type IfStat struct {
-	Exps   []Exp
-	Blocks []*Block
+	Test       Exp
+	Consequent Stat
+	Alternate  Stat
 }
 
-// while exp do block end
 type WhileStat struct {
-	Exp   Exp
-	Block *Block
+	Test   Exp
+	Block  Stat
 }
 
-// repeat block until exp
-type RepeatStat struct {
-	Block *Block
-	Exp   Exp
-}
-
-// for Name ‘=’ exp ‘,’ exp [‘,’ exp] do block end
-type ForNumStat struct {
-	LineOfFor int
-	LineOfDo  int
-	VarName   string
+type ForStat struct {
+	Line int
 	InitExp   Exp
 	LimitExp  Exp
 	StepExp   Exp
-	Block     *Block
+	Block     Stat
 }
 
-// for namelist in explist do block end
-// namelist ::= Name {‘,’ Name}
-// explist ::= exp {‘,’ exp}
-type ForInStat struct {
-	LineOfDo int
-	NameList []string
-	ExpList  []Exp
-	Block    *Block
-}
-
-// varlist ‘=’ explist
-// varlist ::= var {‘,’ var}
-// var ::=  Name | prefixexp ‘[’ exp ‘]’ | prefixexp ‘.’ Name
 type AssignStat struct {
-	LastLine int
-	VarList  []Exp
-	ExpList  []Exp
+	Line   int
+	Left   Stat
+	Right  Exp
 }
 
-// local namelist [‘=’ explist]
-// namelist ::= Name {‘,’ Name}
-// explist ::= exp {‘,’ exp}
-type LocalVarDeclStat struct {
-	LastLine int
-	NameList []string
-	ExpList  []Exp
+type FunctionStat struct {
+	Id       Exp
+	Params   Exp
+	Body     Stat
 }
-/*
-// local function Name funcbody
-type LocalFuncDefStat struct {
-	Name string
-	Exp  *FuncDefExp
-}
-*/
