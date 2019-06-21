@@ -3,16 +3,28 @@ package main
 import (
 
    . "fmt"
-   "github.com/zcp-lang/zcp/lexer"
-   "github.com/zcp-lang/zcp/parser"
+   . "github.com/zcp-lang/zcp/lexer"
+   . "github.com/zcp-lang/zcp/parser"
    //"github.com/zcp-lang/zcp/compiler"
 )
 
 func main(){
 
-str := `a[2]["moid"][4*5]+666`
+str := `
+function add(a,b){
 
-l,_ := lexer.New(str)
+return a + b;
+
+}
+
+a,b,c = 2333,"moid",true;
+
+result = add(a,666);
+
+print(result);
+`
+
+l,_ := New_Lexer(str)
 
 result,err := l.Run()
 
@@ -24,7 +36,7 @@ Println("\n")
 
 Println("语法分析结果:\n")
 
-p := parser.New(result)
+p := New_Parser(result)
 
 p.Run()
 /*
@@ -35,7 +47,7 @@ PUSH 2
 PUSH 3
 PLUS
 CALL print`
-compiler := compiler.New()
+compiler := compiler.New_Compiler()
 
 Println(compiler.StringDecode(asm))
 */
