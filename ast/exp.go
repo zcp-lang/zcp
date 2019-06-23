@@ -61,8 +61,8 @@ type UpdateExp struct {
 type BinaryExp struct {
 	Line int
 	Op   string
-	Exp1 Exp
-	Exp2 Exp
+	Left Exp
+	Right Exp
 }
 
 type ConcatExp struct {

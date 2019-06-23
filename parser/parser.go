@@ -1,10 +1,9 @@
 package parser
 
 import (
-   "fmt"
    "reflect"
    . "github.com/zcp-lang/zcp/lexer"
-   //. "github.com/zcp-lang/zcp/ast"
+   . "github.com/zcp-lang/zcp/ast"
 )
 
 type Parser struct{
@@ -28,11 +27,9 @@ return &Parser{p:0,token:token}
 }
 
 
-func (self *Parser) Run() {
+func (self *Parser) Run() Stat {
 
-exp := self.Block()
-
-fmt.Println(exp)
+return self.Block(true)
 
 }
 

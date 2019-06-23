@@ -76,7 +76,7 @@ if t,_,_ := self.GetTokenSkip(); t != LEFT_BRACE { self.p = p; return nil; }
 
 p1 := self.p
 
-consequent := self.Block()
+consequent := self.Block(false)
 
 if consequent == nil { self.p = p1; }
 
@@ -94,7 +94,7 @@ if t,_,_ := self.GetTokenSkip(); t != LEFT_BRACE { self.p = p2; return IfStat{ex
 
 p3 := self.p
 
-alternate = self.Block()
+alternate = self.Block(false)
 
 if alternate == nil { self.p = p3; }
 
@@ -124,7 +124,7 @@ if t,_,_ := self.GetTokenSkip(); t != LEFT_BRACE { self.p = p; return nil; }
 
 p2 := self.p
 
-body := self.Block()
+body := self.Block(false)
 
 if body == nil { self.p = p2; }
 
@@ -180,7 +180,7 @@ if t,_,_ := self.GetTokenSkip(); t != LEFT_BRACE { self.p = p; return nil; }
 
 p4 := self.p
 
-body := self.Block()
+body := self.Block(false)
 
 if body == nil { self.p = p4; }
 
@@ -214,7 +214,7 @@ if t,_,_ := self.GetTokenSkip(); t != LEFT_BRACE { self.p = p; return nil; }
 
 p2 := self.p
 
-body := self.Block()
+body := self.Block(false)
 
 if body == nil { self.p = p2; }
 

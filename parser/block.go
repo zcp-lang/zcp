@@ -58,7 +58,7 @@ return result
 
 }
 
-func (self *Parser) Block() Stat {
+func (self *Parser) Block(code bool) Stat {
 
 p := self.p
 
