@@ -59,3 +59,33 @@ tt = append(tt,t)
 return tt
 
 }
+
+func (self *Compiler) StringEncode(op [][]string) string {
+
+var result string
+
+for i,v := range op {
+
+for ii,vv := range v {
+
+result += vv
+
+if ii != len(v)-1 {
+
+result += " "
+
+}
+
+}
+
+if i != len(op)-1 {
+
+result += "\n"
+
+}
+
+}
+
+return result
+
+}

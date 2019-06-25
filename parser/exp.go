@@ -231,7 +231,7 @@ left,_,_ := self.GetTokenSkip();
 
 if left != LEFT_PARENTHESIS { self.p = p; return nil; }
 
-exp := self.Exp();
+exp := self.Exp6();
 
 if exp == nil { self.p = p; return nil; }
 

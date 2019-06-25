@@ -47,8 +47,8 @@ type BinopExp struct {
 type LogicalExp struct {
 	Line int
 	Op   string
-	Exp1 Exp
-	Exp2 Exp
+	Left Exp
+	Right Exp
 }
 
 type UpdateExp struct {
