@@ -81,6 +81,14 @@ return self.ReturnStat(result)
 
 return self.LogicalExp(result)
 
+}else if result,ok:=op.(UpdateExp);ok == true {
+
+return self.UpdateExp(result)
+
+}else if result,ok:=op.(CallExp);ok == true {
+
+return self.CallExp(result)
+
 }else if result,ok:=op.(IfStat);ok == true {
 
 return self.IfStat(result)
@@ -339,6 +347,7 @@ params,_ := op.Params.(Exps)
 
 self.Set([]string{"FUNCTION",pa.Name,strconv.Itoa(len(params.Exp)),strconv.Itoa(len(self.bytecode))})
 
+/*
 for _,v := range params.Exp {
 
 t,_ := v.(NameExp)
@@ -346,8 +355,87 @@ t,_ := v.(NameExp)
 self.Set([]string{"PARAMS",t.Name})
 
 }
+*/
+
+var i int
+
+for i=len(params.Exp)-1;i>=0;i-- {
+
+t,_ := params.Exp[i].(NameExp)
+
+self.Set([]string{"PARAMS",t.Name})
+
+}
 
 self.Init(op.Body)
+
+self.Set([]string{"END",strconv.Itoa(len(self.bytecode))})
+
+return true
+
+}
+
+func (self *Compiler) UpdateExp(op UpdateExp) bool {
+
+if op.Op == "++" && op.Prefix == true {
+
+self.Set([]string{"LOAD",op.Argument})
+self.Set([]string{"PUSH","1"})
+self.Set([]string{"ADD"})
+self.Set([]string{"STORE",op.Argument})
+self.Set([]string{"LOAD",op.Argument})
+
+}
+
+if op.Op == "--" && op.Prefix == true {
+
+self.Set([]string{"LOAD",op.Argument})
+self.Set([]string{"PUSH","1"})
+self.Set([]string{"SUB"})
+self.Set([]string{"STORE",op.Argument})
+self.Set([]string{"LOAD",op.Argument})
+
+}
+
+if op.Op == "++" && op.Prefix != true {
+
+self.Set([]string{"LOAD",op.Argument})
+self.Set([]string{"LOAD",op.Argument})
+self.Set([]string{"PUSH","1"})
+self.Set([]string{"ADD"})
+self.Set([]string{"STORE",op.Argument})
+
+}
+
+if op.Op == "--" && op.Prefix != true {
+
+self.Set([]string{"LOAD",op.Argument})
+self.Set([]string{"LOAD",op.Argument})
+self.Set([]string{"PUSH","1"})
+self.Set([]string{"SUB"})
+self.Set([]string{"STORE",op.Argument})
+
+}
+
+return true
+
+}
+
+func (self *Compiler) CallExp(op CallExp) bool {
+
+//self.Init(op.Args)
+
+args,_ := op.Args.(Exps)
+
+for _,v := range args.Exp {
+
+self.Init(v)
+
+}
+
+name,_ := op.Name.(NameExp)
+
+self.Set([]string{"CALL",name.Name,strconv.Itoa(len(args.Exp))})
 
 return true
 

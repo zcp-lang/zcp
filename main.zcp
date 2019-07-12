@@ -1,9 +1,18 @@
-if(a==2333){
+function test(a,b,c){
 
-a = 666;
+c = a + b + c;
 
-}else{
+while(i<c)
+{
+i++;
+}
 
-c = 2+3*4*100;
+if(i==0){
+
+print("ok")
+
+}
+
+return 2333;
 
 }
