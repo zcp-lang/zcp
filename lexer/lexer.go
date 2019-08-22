@@ -2,6 +2,7 @@ package lexer
 
 import (
    "strconv"
+  //. "fmt"
 )
 
 type Tkn struct{
@@ -83,6 +84,10 @@ var tmp string
 
 ch := self.Get()
 
+i_chs := []rune(ch)
+
+i_ch := i_chs[0]
+
 if len(self.src) <= self.p { return t; }
 
 //空格
@@ -102,7 +107,7 @@ t.Value = ch
 t.Line = self.line
 
 //标识符
-}else if "a" <= ch && ch <= "z" || "A" <= ch && ch <= "Z" {
+}else if "a" <= ch && ch <= "z" || "A" <= ch && ch <= "Z" || 0x7F < i_ch && i_ch <= 0xFFFF {
 
 str := self.Identifier()
 
@@ -840,7 +845,7 @@ ch := self.src[self.p]
 
 if ch == -0 { self.p--; break; }
 
-if 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || '0' <= ch && ch <= '9' || ch == '_' {
+if 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || '0' <= ch && ch <= '9' || 0x7F < ch && ch <= 0xFFFF {
 
 result += string(ch); self.p++;
 

@@ -345,7 +345,7 @@ pa,_ := op.Id.(NameExp)
 
 params,_ := op.Params.(Exps)
 
-self.Set([]string{"FUNCTION",pa.Name,strconv.Itoa(len(params.Exp)),strconv.Itoa(len(self.bytecode))})
+self.Set([]string{"FN",pa.Name,strconv.Itoa(len(params.Exp)),strconv.Itoa(len(self.bytecode))})
 
 /*
 for _,v := range params.Exp {
@@ -363,7 +363,7 @@ for i=len(params.Exp)-1;i>=0;i-- {
 
 t,_ := params.Exp[i].(NameExp)
 
-self.Set([]string{"PARAMS",t.Name})
+self.Set([]string{"PRS",t.Name})
 
 }
 

@@ -2,60 +2,155 @@ package vm
 
 import (
    . "fmt"
+    // "time"
      "strconv"
    )
 
 type Vm struct{
-   P int
-   F string
-   Asm [][]string
-   Stack [][]string
+   P string
+   Fn map[string]*Fn
+   Co map[int]*Call
+   Call map[int]map[int]*Call
    Msm map[string]map[string][]string
 }
 
-func New_Vm(asm [][]string) *Vm {
+func New_Vm() *Vm {
 
-return &Vm{0,"main",asm,make([][]string,6),nil}
-
-}
-
-func (self *Vm) Run() {
-
-for _,v := range self.Asm {
-
-self.Init(v)
+return &Vm{"",make(map[string]*Fn),make(map[int]*Call),make(map[int]map[int]*Call),make(map[string]map[string][]string)}
 
 }
 
-Println(self.Stack)
+func (self *Vm) Run(asm [][]string) bool {
+
+self.Init(asm)
+
+return self.Start()
 
 }
 
-func (self *Vm) Init(op []string) bool {
+func (self *Vm) Init(asm [][]string) bool {
 
-if op[0] == "PUSH" {
+var ret,pos,pos2 int
+var main,fn [][]string
 
-return self.Push(op)
+for i:=0;i<len(asm);i++ {
 
-}else if op[0] == "ADD" {
+if asm[i][0]=="FN" {
 
-return self.Add(op)
+pos = i
 
-}else if op[0] == "SUB" {
+for i=i;asm[i][0]!="END";i++ {
 
-return self.Sub(op)
+if asm[i][0]=="RET" {
 
-}else if op[0] == "MUL" {
+ret,_ = strconv.Atoi(asm[i][1])
 
-return self.Mul(op)
+}
 
-}else if op[0] == "DIV" {
+fn = append(fn,asm[i])
 
-return self.Div(op)
+}
 
-}else if op[0] == "STORE" {
+fn = append(fn,asm[i])
 
-return self.Store(op)
+params,_ := strconv.Atoi(fn[0][2])
+
+start,_ := strconv.Atoi(fn[0][3])
+
+end,_ := strconv.Atoi(fn[len(fn)-1][1])
+
+self.Fn[fn[0][1]] = &Fn{fn[0][1],pos,params,ret,start,end,fn}
+
+fn = [][]string{}
+
+}else{
+
+if main==nil { pos2 = i; }
+
+main = append(main,asm[i])
+
+}
+
+}
+
+self.Fn["main"] = &Fn{"main",pos2,0,1,0,0,main}
+
+return true
+
+}
+
+func (self *Vm) Start() bool {
+
+fn := self.Fn["main"]
+
+self.Co[len(self.Co)] = &Call{self,len(self.Co),fn.Pos,fn.Name,0,0,6,fn.Asm,make([][]string,6),make(map[string][]string)}
+
+parame := [][][]string{[][]string{},[][]string{[]string{"INT","3"}},[][]string{[]string{"INT","6"}}}
+
+self.Coroutine([]string{"aaa","bbb","ccc"},parame)
+
+self.Corun()
+
+return true
+
+}
+
+func (self *Vm) Coroutine(name []string,parame [][][]string) bool {
+
+for i:=0;i<len(name);i++ {
+
+fn := self.Fn[name[i]]
+
+call := &Call{self,len(self.Co),fn.Pos,fn.Name,1,0,6,fn.Asm,make([][]string,6),make(map[string][]string)}
+
+for j:=0;j<len(parame[i]);j++ {
+
+call.Set(parame[i][j])
+
+}
+
+self.Co[len(self.Co)] = call
+
+}
+
+return true
+
+}
+
+func (self *Vm) Corun() bool {
+
+var i int
+
+for {
+
+if self.Code()==false { break;}
+
+if i >= len(self.Co) { i = 0; }
+
+if self.Co[i].A < len(self.Co[i].Asm){
+
+self.Co[i].Next()
+
+self.Co[i].A++
+
+}
+
+i++
+
+}
+
+Println(self.Co[0].Stack)
+Println(self.Co[0].Msm)
+
+return true
+
+}
+
+func (self *Vm) Code() bool {
+
+for i:=0;i<len(self.Co);i++ {
+
+if self.Co[i].A < len(self.Co[i].Asm) { return true; }
 
 }
 
@@ -63,136 +158,9 @@ return false
 
 }
 
-func (self *Vm) Push(op []string) bool {
+/*
+func (self *Vm) Call() ([][]string,bool) {
 
-self.Set(self.P,[]string{op[1],"int"})
-
-self.P++
-
-return true
 
 }
-
-func (self *Vm) Add(op []string) bool {
-
-var a,b int
-
-if as:=self.Get(self.P-2);as!=nil { a,_ = strconv.Atoi(as[0]); }
-
-if bs:=self.Get(self.P-1);bs!=nil { b,_ = strconv.Atoi(bs[0]); }
-
-self.P -= 2
-
-self.Set(self.P,[]string{strconv.Itoa(a+b),"int"})
-
-return true
-
-}
-
-func (self *Vm) Sub(op []string) bool {
-
-var a,b int
-
-if as:=self.Get(self.P-2);as!=nil { a,_ = strconv.Atoi(as[0]); }
-
-if bs:=self.Get(self.P-1);bs!=nil { b,_ = strconv.Atoi(bs[0]); }
-
-self.P -= 2
-
-self.Set(self.P,[]string{strconv.Itoa(a-b),"int"})
-
-return true
-
-}
-
-func (self *Vm) Mul(op []string) bool {
-
-var a,b int
-
-if as:=self.Get(self.P-2);as!=nil { a,_ = strconv.Atoi(as[0]); }
-
-if bs:=self.Get(self.P-1);bs!=nil { b,_ = strconv.Atoi(bs[0]); }
-
-self.P -= 2
-
-self.Set(self.P,[]string{strconv.Itoa(a*b),"int"})
-
-return true
-
-}
-
-func (self *Vm) Div(op []string) bool {
-
-var a,b int
-
-if as:=self.Get(self.P-2);as!=nil { a,_ = strconv.Atoi(as[0]); }
-
-if bs:=self.Get(self.P-1);bs!=nil { b,_ = strconv.Atoi(bs[0]); }
-
-self.P -= 2
-
-self.Set(self.P,[]string{strconv.Itoa(a/b),"int"})
-
-return true
-
-}
-
-func (self *Vm) Store(op []string) bool {
-
-Println(self.Stack[self.P])
-
-return true
-
-}
-
-func (self *Vm) Set(p int,op []string) bool {
-
-if len(self.Stack) <= p {
-
-size := p - len(self.Stack)
-
-var i int
-
-for i=0;i<size+1;i++ {
-
-self.App()
-
-}
-
-}
-
-self.Stack[p] = op
-
-return true
-
-}
-
-func (self *Vm) App() {
-
-self.Stack = append(self.Stack,[]string{})
-
-}
-
-func (self *Vm) Pa(p int) {
-
-var i int
-
-for i=p;i<len(self.Stack);i++ {
-
-self.Stack[i] = []string{}
-
-}
-
-}
-
-func (self *Vm) Get(p int) []string {
-
-if len(self.Stack) > p {
-
-return self.Stack[p]
-
-}
-
-return nil
-
-}
+*/

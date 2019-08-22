@@ -4,10 +4,12 @@ import (
 
    . "fmt"
      "os"
+     //"strconv"
      "io/ioutil"
    . "github.com/zcp-lang/zcp/lexer"
    . "github.com/zcp-lang/zcp/parser"
    . "github.com/zcp-lang/zcp/compiler"
+   . "github.com/zcp-lang/zcp/vm"
 )
 
 func Get(file string) (string,bool) {
@@ -71,7 +73,15 @@ ast := p.Run()
 compiler := New_Compiler(ast)
 asm := compiler.Run()
 
-Println(compiler.StringEncode(asm))
+Put("/sdcard/go/app/zcp/main.asm",compiler.StringEncode(asm))
+
+Println(compiler.StringEncode(asm),"\n")
+
+Println(ast,"\n")
+
+vm := New_Vm()
+
+vm.Run(asm)
 
 }else{
 
@@ -90,7 +100,9 @@ Put(os.Args[2],compiler.StringEncode(asm))
 
 }
 
-Println(asm)
+vm := New_Vm()
+
+vm.Run(asm)
 
 }
 

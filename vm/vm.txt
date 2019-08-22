@@ -1,0 +1,660 @@
+package vm
+
+import (
+   . "fmt"
+     "strconv"
+   )
+
+type Vm struct{
+   A int
+   P int
+   F string
+   S_len int
+   Asm [][]string
+   Func map[string]*Func
+   Stack [][]string
+   Msm map[string]map[string][]string
+}
+
+func New_Vm(asm [][]string) *Vm {
+
+return &Vm{0,0,"main",0,asm,make(map[string]*Func),make([][]string,6),make(map[string]map[string][]string)}
+
+}
+
+func (self *Vm) Run() {
+
+self.Msm[self.F] = make(map[string][]string)
+
+self.S_len = len(self.Stack)
+
+for ; self.A < len(self.Asm) ; self.A++ {
+
+self.Analysis(self.Asm[self.A])
+
+}
+
+Println(self.Stack,"\n")
+
+Println(self.Msm)
+
+}
+
+//分析指令
+func (self *Vm) Analysis(op []string) bool {
+
+if self.P < 0 { self.P = 1; }
+
+Println(self.Stack)
+
+if op[0] == "PUSH" {
+
+return self.Push("INT",op)
+
+}else if op[0] == "PUSHS" {
+
+return self.Push("STRING",op)
+
+}else if op[0] == "PUSHF" {
+
+return self.Push("BOOL",[]string{"","false"})
+
+}else if op[0] == "PUSHT" {
+
+return self.Push("BOOL",[]string{"","true"})
+
+}else if op[0] == "PUSHN" {
+
+return self.Push("NULL",op)
+
+}else if op[0] == "ADD" {
+
+return self.Add(op)
+
+}else if op[0] == "SUB" {
+
+return self.Sub(op)
+
+}else if op[0] == "MUL" {
+
+return self.Mul(op)
+
+}else if op[0] == "DIV" {
+
+return self.Div(op)
+
+}else if op[0] == "YUC" {
+
+return self.Yuc(op)
+
+}else if op[0] == "STORE" {
+
+return self.Store(op)
+
+}else if op[0] == "LOAD" {
+
+return self.Load(op)
+
+}else if op[0] == "JB" {
+
+return self.Jb(op)
+
+}else if op[0] == "JG" {
+
+return self.Jg(op)
+
+}else if op[0] == "JBE" {
+
+return self.Jbe(op)
+
+}else if op[0] == "JGE" {
+
+return self.Jge(op)
+
+}else if op[0] == "JE" {
+
+return self.Je(op)
+
+}else if op[0] == "JNE" {
+
+return self.Jne(op)
+
+}else if op[0] == "JEO" {
+
+return self.Jeo(op)
+
+}else if op[0] == "JNEO" {
+
+return self.Jneo(op)
+
+}else if op[0] == "AND" {
+
+return self.And(op)
+
+}else if op[0] == "OR" {
+
+return self.Or(op)
+
+}else if op[0] == "JIF" {
+
+return self.Jif(op)
+
+}else if op[0] == "JMP" {
+
+return self.Jmp(op)
+
+}else if op[0] == "FUNCTION" {
+
+return self.Function(op)
+
+}
+
+self.Pa()
+
+return false
+
+}
+
+//压Stack指令
+func (self *Vm) Push(types string,op []string) bool {
+
+self.Set([]string{types,op[1]})
+
+return true
+
+}
+
+//加法指令
+func (self *Vm) Add(op []string) bool {
+
+a := self.Get(self.P-2)
+b := self.Get(self.P-1)
+
+if a==nil || b==nil { return false; }
+
+self.Stack_sub(2)
+
+if a[0] == "INT" {
+
+a1,_ := strconv.Atoi(a[1])
+b1,err := strconv.Atoi(b[1])
+
+if err!=nil {
+
+self.Set([]string{"STRING",a[1]+b[1]})
+
+}else{
+
+self.Set([]string{"INT",strconv.Itoa(a1+b1)})
+
+}
+
+}
+
+if a[0] == "STRING" {
+
+self.Set([]string{"STRING",a[1]+b[1]})
+
+}
+
+return true
+
+}
+
+//减法指令
+func (self *Vm) Sub(op []string) bool {
+
+a := self.Get(self.P-2)
+b := self.Get(self.P-1)
+
+if a==nil || b==nil { return false; }
+
+self.Stack_sub(2)
+
+if a[0] == "INT" {
+
+a1,_ := strconv.Atoi(a[1])
+b1,_ := strconv.Atoi(b[1])
+
+return self.Set([]string{"INT",strconv.Itoa(a1-b1)})
+
+}
+
+return self.Set([]string{"NULL","null"})
+
+}
+
+//乘法指令
+func (self *Vm) Mul(op []string) bool {
+
+a := self.Get(self.P-2)
+b := self.Get(self.P-1)
+
+if a==nil || b==nil { return false; }
+
+self.Stack_sub(2)
+
+if a[0] == "INT" {
+
+a1,_ := strconv.Atoi(a[1])
+b1,_ := strconv.Atoi(b[1])
+
+return self.Set([]string{"INT",strconv.Itoa(a1*b1)})
+
+}
+
+return self.Set([]string{"NULL","null"})
+
+}
+
+//除法指令
+func (self *Vm) Div(op []string) bool {
+
+a := self.Get(self.P-2)
+b := self.Get(self.P-1)
+
+if a==nil || b==nil { return false; }
+
+self.Stack_sub(2)
+
+if a[0] == "INT" {
+
+a1,_ := strconv.Atoi(a[1])
+b1,_ := strconv.Atoi(b[1])
+
+return self.Set([]string{"INT",strconv.Itoa(a1/b1)})
+
+}
+
+return self.Set([]string{"NULL","null"})
+
+}
+
+//求余指令
+func (self *Vm) Yuc(op []string) bool {
+
+a := self.Get(self.P-2)
+b := self.Get(self.P-1)
+
+if a==nil || b==nil { return false; }
+
+self.Stack_sub(2)
+
+if a[0] == "INT" {
+
+a1,_ := strconv.Atoi(a[1])
+b1,_ := strconv.Atoi(b[1])
+
+return self.Set([]string{"INT",strconv.Itoa(a1%b1)})
+
+}
+
+return self.Set([]string{"NULL","null"})
+
+}
+
+//向内存写入数据
+func (self *Vm) Store(op []string) bool {
+
+var v []string
+
+if self.P > 0 { v = self.Get(self.P-1); }else{ v = self.Stack[self.P]; }
+
+//self.Stack_sub(2)
+
+self.Stack_set(self.P-1)
+
+self.Msm[self.F][op[1]] = v
+
+self.Pa()
+
+return true
+
+}
+
+//从内存加载数据到Stack
+func (self *Vm) Load(op []string) bool {
+
+result := self.Set(self.Msm[self.F][op[1]])
+
+return result
+
+}
+
+// <
+func (self *Vm) Jb(op []string) bool {
+
+a := self.Get(self.P-2)
+b := self.Get(self.P-1)
+
+if a==nil || b==nil { return false; }
+
+self.Stack_sub(2)
+
+a1,_ := strconv.Atoi(a[1])
+b1,_ := strconv.Atoi(b[1])
+
+if a1 < b1 { return self.Set([]string{"BOOL","true"}); }
+
+return self.Set([]string{"BOOL","false"})
+
+}
+
+// >
+func (self *Vm) Jg(op []string) bool {
+
+a := self.Get(self.P-2)
+b := self.Get(self.P-1)
+
+if a==nil || b==nil { return false; }
+
+self.Stack_sub(2)
+
+a1,_ := strconv.Atoi(a[1])
+b1,_ := strconv.Atoi(b[1])
+
+if a1 > b1 { return self.Set([]string{"BOOL","true"}); }
+
+return self.Set([]string{"BOOL","false"})
+
+}
+
+// <=
+func (self *Vm) Jbe(op []string) bool {
+
+a := self.Get(self.P-2)
+b := self.Get(self.P-1)
+
+if a==nil || b==nil { return false; }
+
+self.Stack_sub(2)
+
+a1,_ := strconv.Atoi(a[1])
+b1,_ := strconv.Atoi(b[1])
+
+if a1 <= b1 { return self.Set([]string{"BOOL","true"}); }
+
+return self.Set([]string{"BOOL","false"})
+
+}
+
+// >=
+func (self *Vm) Jge(op []string) bool {
+
+a := self.Get(self.P-2)
+b := self.Get(self.P-1)
+
+if a==nil || b==nil { return false; }
+
+self.Stack_sub(2)
+
+a1,_ := strconv.Atoi(a[1])
+b1,_ := strconv.Atoi(b[1])
+
+if a1 >= b1 { return self.Set([]string{"BOOL","true"}); }
+
+return self.Set([]string{"BOOL","false"})
+
+}
+
+// ==
+func (self *Vm) Je(op []string) bool {
+
+a := self.Get(self.P-2)
+b := self.Get(self.P-1)
+
+if a==nil || b==nil { return false; }
+
+self.Stack_sub(2)
+
+a1,_ := strconv.Atoi(a[1])
+b1,_ := strconv.Atoi(b[1])
+
+if a1 == b1 { return self.Set([]string{"BOOL","true"}); }
+
+return self.Set([]string{"BOOL","false"})
+
+}
+
+// !=
+func (self *Vm) Jne(op []string) bool {
+
+a := self.Get(self.P-2)
+b := self.Get(self.P-1)
+
+if a==nil || b==nil { return false; }
+
+self.Stack_sub(2)
+
+a1,_ := strconv.Atoi(a[1])
+b1,_ := strconv.Atoi(b[1])
+
+if a1 != b1 { return self.Set([]string{"BOOL","true"}); }
+
+return self.Set([]string{"BOOL","false"})
+
+}
+
+// ===
+func (self *Vm) Jeo(op []string) bool {
+
+a := self.Get(self.P-2)
+b := self.Get(self.P-1)
+
+if a==nil || b==nil { return false; }
+
+self.Stack_sub(2)
+
+if a[0]!=b[0] || a[1]!=b[1] { return self.Set([]string{"BOOL","false"}); }
+
+return self.Set([]string{"BOOL","true"})
+
+}
+
+// !==
+func (self *Vm) Jneo(op []string) bool {
+
+a := self.Get(self.P-2)
+b := self.Get(self.P-1)
+
+if a==nil || b==nil { return false; }
+
+self.Stack_sub(2)
+
+if a[0]==b[0] { return self.Set([]string{"BOOL","false"}); }
+
+return self.Set([]string{"BOOL","true"})
+
+}
+
+// and(&&)
+func (self *Vm) And(op []string) bool {
+
+a := self.Get(self.P-2)
+b := self.Get(self.P-1)
+
+if a==nil || b==nil { return false; }
+
+self.Stack_sub(2)
+
+if (a[1]!="null"&&a[1]!="false") && (b[1]!="null"&&b[1]!="false") {
+
+return self.Set([]string{"BOOL","true"});
+
+}
+
+return self.Set([]string{"BOOL","false"})
+
+}
+
+// or(||)
+func (self *Vm) Or(op []string) bool {
+
+a := self.Get(self.P-2)
+b := self.Get(self.P-1)
+
+if a==nil || b==nil { return false; }
+
+self.Stack_sub(2)
+
+if (a[1]!="null"&&a[1]!="false") || (b[1]!="null"&&b[1]!="false") {
+
+return self.Set([]string{"BOOL","true"});
+
+}
+
+return self.Set([]string{"BOOL","false"})
+
+}
+
+// if
+func (self *Vm) Jif(op []string) bool {
+
+exp := self.Get(self.P-1)
+
+self.Stack_set(self.P-1)
+
+if exp[1] == "true" {
+
+self.A++
+
+}
+
+return true
+
+}
+
+//跳转指令
+func (self *Vm) Jmp(op []string) bool {
+
+i,err := strconv.Atoi(op[1])
+
+if err!=nil { return false; }
+
+self.A = i - 1
+
+return true
+
+}
+
+//函数定义
+func (self *Vm) Function(op []string) bool {
+
+var ret,params,start,ends int
+var end []string
+
+for ; self.A < len(self.Asm) ; self.A++ {
+
+end = self.Asm[self.A]
+
+if end[0] == "RET" { ret,_ = strconv.Atoi(end[1]); }
+
+if end[0] == "END" { ends,_ = strconv.Atoi(end[1]); break; }
+
+}
+
+params,_ = strconv.Atoi(op[2]);
+
+start,_ = strconv.Atoi(op[3]);
+
+self.Func[op[1]] = &Func{op[1],params,ret,start,ends,self.Asm}
+
+return true
+
+}
+
+//向Stack写入数据
+func (self *Vm) Set(op []string) bool {
+
+if len(self.Stack) <= self.S_len { self.Stack = append(self.Stack,[]string{}); }
+
+if len(self.Stack) <= self.P {
+
+for i:=0;i<(self.P+3)-len(self.Stack);i++ {
+
+self.Stack = append(self.Stack,[]string{})
+
+}
+
+}
+
+if self.P < 0 { self.P = 0; }
+
+self.Stack[self.P] = op
+
+self.P++
+
+self.Pa()
+
+return true
+
+}
+
+//获取指定Stack位置数据
+func (self *Vm) Get(p int) []string {
+
+if p >= 0 && len(self.Stack) >= p { return self.Stack[p]; }
+
+self.P = 1
+
+return nil
+
+}
+
+//减少Stack指针位置
+func (self *Vm) Stack_sub(p int) bool {
+
+if (self.P-p) < 0 { self.P = 1; }else{ self.P -= p; }
+
+self.Pa()
+
+if self.P < 0 { return false; }
+
+return true
+
+}
+
+//增加Stack指针位置
+func (self *Vm) Stack_add(p int) bool {
+
+self.P += p
+
+if len(self.Stack) <= self.P {
+
+for i:=0;i<(self.P+3)-len(self.Stack);i++ {
+
+self.Stack = append(self.Stack,[]string{})
+
+}
+
+self.Pa()
+
+}
+
+return true
+
+}
+
+//设置Stack指针位置
+func (self *Vm) Stack_set(p int) bool {
+
+if p < 0 { self.P = 0; }else{ self.P = p; }
+
+self.Pa()
+
+return true
+
+}
+
+//清空Stack
+func (self *Vm) Pa() {
+
+if self.P < 0 { self.P = 0; }
+
+for i:=self.P;i<len(self.Stack);i++ {
+
+self.Stack[i] = []string{}
+
+}
+
+}

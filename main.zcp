@@ -1,18 +1,35 @@
-function test(a,b,c){
+function aaa(){
 
-c = a + b + c;
-
-while(i<c)
-{
-i++;
-}
-
-if(i==0){
-
-print("ok")
+j = 2333 + 666;
 
 }
 
-return 2333;
+function bbb(x){
+
+y = 23 + x;
 
 }
+
+function ccc(o){
+
+s = 666 + o;
+
+return s;
+
+v = 2333;
+
+}
+
+function calls(a,b,c){
+
+result = a + b + c;
+
+return result;
+
+}
+
+a1 = 2;
+b1 = 3;
+c1 = a1 + b1;
+
+v1 = calls(a1,b1,c1)
