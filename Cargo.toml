@@ -1,0 +1,14 @@
+[package]
+name = "zcp-lang"
+version = "0.1.0"
+edition = "2021"
+description = "A short description of the crate"  # 描述
+license = "MIT OR Apache-2.0"               # 许可证
+documentation = "https://github.com/zcp-lang/zcp"  # 文档链接
+repository = "https://github.com/zcp-lang/zcp" # 仓库地址
+homepage = "https://github.com/zcp-lang/zcp"   # 主页地址
+keywords = ["example", "rust", "demo"]      # 关键词
+categories = ["command-line-utilities"]     # 类别
+readme = "README.md"                        # README 文件路径
+
+[dependencies]
